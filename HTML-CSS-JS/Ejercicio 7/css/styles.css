@@ -1,0 +1,165 @@
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.portero-container {
+    width: 300px;
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.visores {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.visor-piso, .visor-dpto {
+    background-color: #555;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 2em;
+    width: 80px;
+    font-family: monospace;
+}
+
+.visor-mensaje {
+    background-color: #111;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    min-height: 20px;
+    color: #00ff00; /* Color de texto como si fuera una pantalla de LED */
+}
+
+.teclado {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+button {
+    padding: 15px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #666;
+}
+
+#btnLlamar {
+    background-color: #28a745;
+    grid-column: span 2;
+}
+
+#btnLlamar:hover {
+    background-color: #218838;
+}
+
+#btnBorrar {
+    background-color: #dc3545;
+}
+
+#btnBorrar:hover {
+    background-color: #c82333;
+}
+
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.teclado-container {
+    width: 600px;
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.display {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    height: 60px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 2em;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    word-break: break-all;
+    text-align: left;
+    font-family: monospace;
+    color: #444;
+}
+
+.teclado-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fila {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tecla {
+    padding: 15px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    background-color: #555;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex: 1;
+}
+
+.tecla:hover {
+    background-color: #777;
+}
+
+.controles {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#btnBorrar, #btnBackspace {
+    padding: 15px 30px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#btnBorrar:hover, #btnBackspace:hover {
+    background-color: #c82333;
+}
