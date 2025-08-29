@@ -1,0 +1,38 @@
+/* Estilos generales para todos los elementos de la tabla */
+table, tr, td {
+    border: 2px solid black;
+    border-collapse: collapse; /* Evita el doble borde y hace la tabla más limpia */
+}
+
+/* Color de fondo para todas las celdas (<td>) */
+td {
+    background-color: lightblue;
+    width: 80px;
+    height: 80px;
+    text-align: center;
+}
+
+/* Color de fondo para los elementos de la tercer columna */
+td:nth-child(3) {
+    background-color: darkgreen;
+}
+
+/* Color de fondo para toda la segunda fila */
+.fila-destacada {
+    background-color: orange;
+}
+
+/* Color de fondo para la celda de la intersección entre la 2da fila y 3er columna */
+.celda-destacada {
+    background-color: purple;
+}
+
+/* Color de fondo para la celda de la intersección entre la 3er fila y 2da columna */
+.celda-especial {
+    background-color: red;
+}
+
+/* Color de fondo común para la primer y la última celda */
+.destacada {
+    background-color: yellow;
+}

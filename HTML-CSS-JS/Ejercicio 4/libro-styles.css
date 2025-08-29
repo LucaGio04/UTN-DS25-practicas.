@@ -1,0 +1,36 @@
+body {
+    font-family: 'Times New Roman', Times, serif;
+    line-height: 1.8;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fdf6e3;
+    color: #586e75;
+    border: 1px solid #eee8d5;
+}
+
+h1, h2 {
+    color: #268bd2;
+    text-align: center;
+}
+
+p {
+    text-indent: 20px;
+    text-align: justify;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #93a1a1;
+}
+
+a {
+    color: #2aa198;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    color: #268bd2;
+    text-decoration: underline;
+}
