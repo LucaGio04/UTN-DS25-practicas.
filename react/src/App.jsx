@@ -30,16 +30,7 @@ const HomePage = ({ featuredBooks }) => {
 };
 
 // Componente para las páginas de secciones (Ficción, Ciencia, etc.)
-const SectionPage = ({ title }) => {
-  const books = [
-    { id: 1, title: 'El Gran Gatsby', author: 'F. Scott Fitzgerald', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Gatsby' },
-    { id: 2, title: 'Cien años de soledad', author: 'Gabriel García Márquez', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Soledad' },
-    { id: 3, title: '1984', author: 'George Orwell', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=1984' },
-    { id: 4, title: 'Matar a un ruiseñor', author: 'Harper Lee', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Ruiseñor' },
-    { id: 5, title: 'Orgullo y prejuicio', author: 'Jane Austen', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Orgullo' },
-    { id: 6, title: 'El señor de los anillos', author: 'J.R.R. Tolkien', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Anillos' },
-  ];
-
+const SectionPage = ({ title, books }) => {
   return (
     <div className="p-8">
       <h2 className="text-3xl font-bold mb-6 text-center">{title}</h2>
@@ -199,15 +190,43 @@ const Layout = ({ currentPage, setCurrentPage }) => {
 
       <main className="flex-grow">
         {currentPage === 'inicio' && <HomePage featuredBooks={[
-          { id: 1, title: 'El Gran Gatsby', author: 'F. Scott Fitzgerald', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Gatsby' },
-          { id: 2, title: 'Cien años de soledad', author: 'Gabriel García Márquez', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Soledad' },
-          { id: 3, title: '1984', author: 'George Orwell', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=1984' },
-          { id: 4, title: 'Matar a un ruiseñor', author: 'Harper Lee', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Ruiseñor' }
+          { id: 1, title: 'Dune', author: 'Frank Herbert', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Dune' },
+          { id: 2, title: '1984', author: 'George Orwell', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=1984' },
+          { id: 3, title: 'El señor de los anillos', author: 'J.R.R. Tolkien', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Anillos' },
+          { id: 4, title: 'Cien años de soledad', author: 'Gabriel García Márquez', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Soledad' }
         ]} />}
-        {currentPage === 'ficcion' && <SectionPage title="Sección: Ficción" />}
-        {currentPage === 'ciencia' && <SectionPage title="Sección: Ciencia" />}
-        {currentPage === 'historia' && <SectionPage title="Sección: Historia" />}
-        {currentPage === 'biografias' && <SectionPage title="Sección: Biografías" />}
+        {currentPage === 'ficcion' && <SectionPage title="Sección: Ficción" books={[
+          { id: 5, title: 'Fundación', author: 'Isaac Asimov', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Fundación' },
+          { id: 6, title: 'Neuromante', author: 'William Gibson', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Neuromante' },
+          { id: 7, title: 'El dador', author: 'Lois Lowry', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=El+Dador' },
+          { id: 8, title: 'Ready Player One', author: 'Ernest Cline', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Ready+Player+One' },
+          { id: 9, title: 'El juego de Ender', author: 'Orson Scott Card', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Ender' },
+          { id: 10, title: 'Fahrenheit 451', author: 'Ray Bradbury', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Fahrenheit+451' },
+        ]} />}
+        {currentPage === 'ciencia' && <SectionPage title="Sección: Ciencia" books={[
+          { id: 11, title: 'Cosmos', author: 'Carl Sagan', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Cosmos' },
+          { id: 12, title: 'Breve historia del tiempo', author: 'Stephen Hawking', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Tiempo' },
+          { id: 13, title: 'El gen egoísta', author: 'Richard Dawkins', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Gen+egoísta' },
+          { id: 14, title: 'Sapiens', author: 'Yuval Noah Harari', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Sapiens' },
+          { id: 15, title: 'La doble hélice', author: 'James D. Watson', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Doble+hélice' },
+          { id: 16, title: 'Un viaje a la luna', author: 'Julio Verne', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Viaje+a+la+Luna' },
+        ]} />}
+        {currentPage === 'historia' && <SectionPage title="Sección: Historia" books={[
+          { id: 17, title: 'Armas, gérmenes y acero', author: 'Jared Diamond', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Armas' },
+          { id: 18, title: 'Una historia del mundo', author: 'Andrew Marr', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Historia' },
+          { id: 19, title: 'La guerra de los 30 años', author: 'C.V. Wedgwood', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=30+Años' },
+          { id: 20, title: 'El coloso en guerra', author: 'Robert F. Kennedy', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=El+Coloso' },
+          { id: 21, title: 'La caída de Roma', author: 'Peter Heather', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Caída+de+Roma' },
+          { id: 22, title: 'El segundo sexo', author: 'Simone de Beauvoir', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=El+Segundo+Sexo' },
+        ]} />}
+        {currentPage === 'biografias' && <SectionPage title="Sección: Biografías" books={[
+          { id: 23, title: 'La biografía de Steve Jobs', author: 'Walter Isaacson', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Steve+Jobs' },
+          { id: 24, title: 'Einstein: Su vida y su universo', author: 'Walter Isaacson', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Einstein' },
+          { id: 25, title: 'El diario de Ana Frank', author: 'Ana Frank', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Ana+Frank' },
+          { id: 26, title: 'Nelson Mandela: Conversaciones conmigo mismo', author: 'Nelson Mandela', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Mandela' },
+          { id: 27, title: 'Yo soy Malala', author: 'Malala Yousafzai', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Malala' },
+          { id: 28, title: 'Leonardo da Vinci', author: 'Walter Isaacson', cover: 'https://placehold.co/200x300/F2F2F2/A9A9A9?text=Da+Vinci' },
+        ]} />}
         {currentPage === 'registros' && <RegistrationPage />}
         {currentPage === 'contacto' && <ContactPage />}
       </main>
