@@ -1,0 +1,10 @@
+/* Añade las directivas base, components y utilities de Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos globales y reseteo básico para toda la página */
+body {
+  margin: 0;
+  line-height: 1.6;
+}
