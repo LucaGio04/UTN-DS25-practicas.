@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import BookCard from './Bookcard.jsx';
 import { useBooks } from '../hooks/useBooks.js';
 import { useSearch } from '../hooks/useBooks.js';
 
 export const HomePage = () => {
   const { books, getAllBooks, getBooksByCategory } = useBooks();
-  const { searchQuery, handleSearch, clearSearch, getSearchResults } = useSearch();
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
-  const [showSearchResults, setShowSearchResults] = useState(false);
+  const { searchQuery, getSearchResults } = useSearch();
   const allBooks = getAllBooks();
 
   // useEffect: Ejemplo de efecto para actualizar estadísticas cuando cambian los libros
@@ -23,24 +21,10 @@ export const HomePage = () => {
     });
   }, [allBooks.length, getBooksByCategory]);
 
-  // Combinar búsqueda global con búsqueda local
-  const effectiveSearchQuery = searchQuery || localSearchQuery;
-  
-  // Filtrar libros según la búsqueda
-  const filteredBooks = effectiveSearchQuery 
+  // Filtrar libros según la búsqueda global
+  const filteredBooks = searchQuery 
     ? getSearchResults()
     : [];
-
-  const handleLocalSearch = (e) => {
-    const query = e.target.value;
-    setLocalSearchQuery(query);
-    setShowSearchResults(query.length > 0);
-  };
-
-  const clearLocalSearch = () => {
-    setLocalSearchQuery('');
-    setShowSearchResults(false);
-  };
 
   return (
     <div>
@@ -50,42 +34,15 @@ export const HomePage = () => {
         <p className="text-xl text-gray-600 mb-8">
           Descubre miles de libros en todas las categorías
         </p>
-        
-        {/* Búsqueda local */}
-        <div className="max-w-md mx-auto mb-8">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Buscar en la librería..."
-              value={localSearchQuery}
-              onChange={handleLocalSearch}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            {localSearchQuery && (
-              <button
-                onClick={clearLocalSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                ×
-              </button>
-            )}
-          </div>
-        </div>
       </div>
 
-      {/* Resultados de búsqueda local */}
-      {showSearchResults && (
+      {/* Resultados de búsqueda */}
+      {searchQuery && (
         <div className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">
-              Resultados de búsqueda: "{localSearchQuery}"
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-center">
+              Resultados de búsqueda: "{searchQuery}"
             </h2>
-            <button
-              onClick={clearLocalSearch}
-              className="text-blue-600 hover:text-blue-800 underline"
-            >
-              Limpiar búsqueda
-            </button>
           </div>
           
           {filteredBooks.length > 0 ? (
@@ -97,7 +54,7 @@ export const HomePage = () => {
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500 text-lg">
-                No se encontraron libros que coincidan con "{localSearchQuery}"
+                No se encontraron libros que coincidan con "{searchQuery}"
               </p>
             </div>
           )}
@@ -105,7 +62,7 @@ export const HomePage = () => {
       )}
 
       {/* Libros Destacados */}
-      {!showSearchResults && (
+      {!searchQuery && (
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6 text-center">Libros Destacados</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -123,7 +80,7 @@ export const HomePage = () => {
       )}
 
       {/* Explorar Categorías */}
-      {!showSearchResults && (
+      {!searchQuery && (
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6 text-center">Explorar Categorías</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -155,7 +112,7 @@ export const HomePage = () => {
       )}
 
       {/* Estadísticas rápidas */}
-      {!showSearchResults && (
+      {!searchQuery && (
         <div className="bg-gray-50 p-6 rounded-lg text-center">
           <h3 className="text-xl font-bold mb-4">Nuestra Librería en Números</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

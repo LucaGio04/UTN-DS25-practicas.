@@ -160,15 +160,31 @@ export const BookProvider = ({ children }) => {
     return Object.values(categories).flat();
   };
 
+  // Función para normalizar texto (eliminar acentos)
+  const normalizeText = (text) => {
+    if (!text) return '';
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  };
+
   // Función para buscar libros
   const searchBooks = (query) => {
-    if (!query.trim()) return getAllBooks();
+    if (!query || !query.trim()) return getAllBooks();
     
-    return getAllBooks().filter(book =>
-      book.title.toLowerCase().includes(query.toLowerCase()) ||
-      book.author.toLowerCase().includes(query.toLowerCase()) ||
-      book.category.toLowerCase().includes(query.toLowerCase())
-    );
+    const searchTerm = normalizeText(query.trim());
+    const allBooks = getAllBooks();
+    
+    const results = allBooks.filter(book => {
+      const titleMatch = book.title ? normalizeText(book.title).includes(searchTerm) : false;
+      const authorMatch = book.author ? normalizeText(book.author).includes(searchTerm) : false;
+      const categoryMatch = book.category ? normalizeText(book.category).includes(searchTerm) : false;
+      
+      return titleMatch || authorMatch || categoryMatch;
+    });
+    
+    return results;
   };
 
   // Función para obtener libros por categoría

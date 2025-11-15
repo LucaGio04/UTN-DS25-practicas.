@@ -4,6 +4,16 @@ import { useBooks } from '../hooks/useBooks.js';
 
 export const CatalogPage = ({ books, searchQuery }) => {
   const { removeBook } = useBooks();
+  
+  const handleRemoveBook = async (bookId, category) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este libro?')) {
+      try {
+        await removeBook(bookId, category);
+      } catch (error) {
+        alert(`Error al eliminar libro: ${error.message}`);
+      }
+    }
+  };
   const getCategoryDisplayName = (category) => {
     const categoryNames = {
       'ficcion': 'Ficción',
@@ -40,7 +50,7 @@ export const CatalogPage = ({ books, searchQuery }) => {
               <BookCard book={book} />
               <div className="absolute top-2 right-2">
                 <button
-                  onClick={() => removeBook(book.id, book.category)}
+                  onClick={() => handleRemoveBook(book.id, book.category)}
                   className="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold"
                   title="Eliminar libro"
                 >

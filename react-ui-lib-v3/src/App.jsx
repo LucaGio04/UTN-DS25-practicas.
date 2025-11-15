@@ -45,18 +45,19 @@ function AppContent() {
    * useEffect - Ejemplo 1: Cargar datos al montar el componente
    * 
    * Este efecto se ejecuta una vez cuando el componente se monta.
-   * Carga los libros desde la API externa usando Fetch.
+   * Carga los libros desde la API Express usando Fetch.
    * 
    * Conceptos aplicados:
    * - useEffect: Efecto secundario al montar el componente
    * - Fetch API: La función loadBooksFromApi usa Fetch internamente
+   * - API Express: Conecta con nuestra API local en lugar de datos mockeados
    * 
    * Nota: Usamos un array vacío [] para que solo se ejecute al montar,
    * evitando loops infinitos. La función loadBooksFromApi está memoizada
    * con useCallback en el hook useBooks.
    */
   useEffect(() => {
-    console.log('🔄 Cargando datos de la API...');
+    console.log('🔄 Cargando datos de la API Express...');
     loadBooksFromApi();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo ejecutar al montar el componente
@@ -99,7 +100,7 @@ function AppContent() {
       {/* Indicador de error */}
       {error && (
         <div className="fixed top-0 left-0 right-0 bg-red-600 text-white p-2 text-center z-50">
-          <span>❌ Error: {error} - Usando datos locales</span>
+          <span>❌ Error: {error}</span>
         </div>
       )}
 

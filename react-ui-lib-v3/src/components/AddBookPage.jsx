@@ -19,16 +19,13 @@ export const AddBookPage = () => {
 
   const onSubmit = async (formData) => {
     try {
-      // Simular delay de envío
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Agregar el libro usando el contexto
-      addBook(formData);
+      // Agregar el libro usando la API
+      await addBook(formData);
       
       // Limpiar formulario
       resetForm();
       
-      // Mostrar mensaje de éxito (podrías usar un toast o modal aquí)
+      // Mostrar mensaje de éxito
       alert('¡Libro agregado exitosamente al catálogo!');
       
     } catch (error) {
@@ -37,16 +34,6 @@ export const AddBookPage = () => {
     }
   };
 
-  const coverOptions = [
-    { value: '/img/ficcion-1.jpg', label: 'Ficción 1' },
-    { value: '/img/ficcion-2.jpg', label: 'Ficción 2' },
-    { value: '/img/ficcion-3.jpg', label: 'Ficción 3' },
-    { value: '/img/ficcion-4.jpg', label: 'Ficción 4' },
-    { value: '/img/ficcion-5.jpg', label: 'Ficción 5' },
-    { value: '/img/ciencia-portada.jpg', label: 'Ciencia' },
-    { value: '/img/historia-portada.jpg', label: 'Historia' },
-    { value: '/img/no-ficcion-portada.jpg', label: 'No Ficción' }
-  ];
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -145,11 +132,14 @@ export const AddBookPage = () => {
                 hasError('cover') ? 'border-red-500' : 'border-gray-300'
               }`}
             >
-              {coverOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              <option value="/img/ficcion-1.jpg">Ficción 1</option>
+              <option value="/img/ficcion-2.jpg">Ficción 2</option>
+              <option value="/img/ficcion-3.jpg">Ficción 3</option>
+              <option value="/img/ficcion-4.jpg">Ficción 4</option>
+              <option value="/img/ficcion-5.jpg">Ficción 5</option>
+              <option value="/img/ciencia-portada.jpg">Ciencia</option>
+              <option value="/img/historia-portada.jpg">Historia</option>
+              <option value="/img/no-ficcion-portada.jpg">No Ficción</option>
             </select>
             {hasError('cover') && (
               <p className="mt-1 text-sm text-red-600">{getError('cover')}</p>
