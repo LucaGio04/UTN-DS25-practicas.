@@ -146,9 +146,9 @@ export const useBooks = () => {
       
       const newBook = response.data;
       
-      // Actualizar el estado local
-      context.addBook(newBook, newBook.category);
-      context.setLoading(false);
+      // Recargar todos los libros desde la API para mantener sincronización
+      // Esto evita duplicados y asegura que el estado local refleje la DB
+      await loadBooksFromApi();
       
       return newBook;
     } catch (err) {
@@ -157,7 +157,7 @@ export const useBooks = () => {
       context.setLoading(false);
       throw err;
     }
-  }, [fetchData, context]);
+  }, [fetchData, loadBooksFromApi, context]);
 
   /**
    * Función para eliminar un libro a través de la API
@@ -174,16 +174,15 @@ export const useBooks = () => {
         throw new Error(response.error || 'Error al eliminar libro');
       }
       
-      // Actualizar el estado local
-      context.removeBook(bookId, category);
-      context.setLoading(false);
+      // Recargar todos los libros desde la API para mantener sincronización
+      await loadBooksFromApi();
     } catch (err) {
       console.error('Error removing book:', err);
       context.setError(err.message || 'Error al eliminar libro');
       context.setLoading(false);
       throw err;
     }
-  }, [fetchData, context]);
+  }, [fetchData, loadBooksFromApi, context]);
 
   return {
     // Estado

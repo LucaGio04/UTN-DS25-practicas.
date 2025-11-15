@@ -1,14 +1,21 @@
 import express from 'express';
-import { booksData } from '../data/books.js';
+import {
+  getAllBooks,
+  getBookById,
+  createBook,
+  updateBook,
+  deleteBook,
+  getBooksByCategory,
+  getFeaturedBooks,
+  searchBooks
+} from '../src/services/book.service.js';
 
 const router = express.Router();
 
 // GET /api/books - Obtener todos los libros
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    // Obtener todos los libros de todas las categorías (excluyendo featured)
-    const { featured, ...categories } = booksData;
-    const allBooks = Object.values(categories).flat();
+    const allBooks = await getAllBooks();
     
     res.json({
       success: true,
@@ -16,7 +23,9 @@ router.get('/', (req, res) => {
       total: allBooks.length
     });
   } catch (error) {
-    res.status(500).json({
+    console.error('Error fetching books:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
       success: false,
       error: error.message
     });
@@ -24,10 +33,10 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/books/category/:category - Obtener libros por categoría
-router.get('/category/:category', (req, res) => {
+router.get('/category/:category', async (req, res) => {
   try {
     const { category } = req.params;
-    const books = booksData[category] || [];
+    const books = await getBooksByCategory(category);
     
     res.json({
       success: true,
@@ -36,7 +45,9 @@ router.get('/category/:category', (req, res) => {
       total: books.length
     });
   } catch (error) {
-    res.status(500).json({
+    console.error('Error fetching books by category:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
       success: false,
       error: error.message
     });
@@ -44,15 +55,19 @@ router.get('/category/:category', (req, res) => {
 });
 
 // GET /api/books/featured - Obtener libros destacados
-router.get('/featured', (req, res) => {
+router.get('/featured', async (req, res) => {
   try {
+    const featuredBooks = await getFeaturedBooks();
+    
     res.json({
       success: true,
-      data: booksData.featured || [],
-      total: booksData.featured?.length || 0
+      data: featuredBooks,
+      total: featuredBooks.length
     });
   } catch (error) {
-    res.status(500).json({
+    console.error('Error fetching featured books:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
       success: false,
       error: error.message
     });
@@ -60,29 +75,10 @@ router.get('/featured', (req, res) => {
 });
 
 // GET /api/books/search?q=query - Buscar libros
-router.get('/search', (req, res) => {
+router.get('/search', async (req, res) => {
   try {
     const query = req.query.q || '';
-    
-    if (!query.trim()) {
-      const { featured, ...categories } = booksData;
-      const allBooks = Object.values(categories).flat();
-      return res.json({
-        success: true,
-        data: allBooks,
-        total: allBooks.length
-      });
-    }
-    
-    const { featured, ...categories } = booksData;
-    const allBooks = Object.values(categories).flat();
-    
-    const searchTerm = query.toLowerCase();
-    const results = allBooks.filter(book =>
-      book.title.toLowerCase().includes(searchTerm) ||
-      book.author.toLowerCase().includes(searchTerm) ||
-      book.category.toLowerCase().includes(searchTerm)
-    );
+    const results = await searchBooks(query);
     
     res.json({
       success: true,
@@ -91,7 +87,9 @@ router.get('/search', (req, res) => {
       total: results.length
     });
   } catch (error) {
-    res.status(500).json({
+    console.error('Error searching books:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
       success: false,
       error: error.message
     });
@@ -99,75 +97,78 @@ router.get('/search', (req, res) => {
 });
 
 // GET /api/books/:id - Obtener un libro por ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const bookId = parseInt(id);
     
-    const { featured, ...categories } = booksData;
-    const allBooks = Object.values(categories).flat();
-    const book = allBooks.find(b => b.id === bookId);
-    
-    if (!book) {
-      return res.status(404).json({
+    if (isNaN(parseInt(id))) {
+      return res.status(400).json({
         success: false,
-        error: 'Libro no encontrado'
+        error: 'ID inválido'
       });
     }
+    
+    const book = await getBookById(id);
     
     res.json({
       success: true,
       data: book
     });
   } catch (error) {
-    res.status(500).json({
+    console.error('Error fetching book by ID:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
       success: false,
       error: error.message
     });
   }
 });
 
-// POST /api/books - Agregar un nuevo libro
-router.post('/', (req, res) => {
+// POST /api/books - Crear un nuevo libro
+router.post('/', async (req, res) => {
   try {
-    const { title, author, category, cover } = req.body;
-    
-    // Validación básica
-    if (!title || !author || !category) {
-      return res.status(400).json({
-        success: false,
-        error: 'Faltan campos requeridos: title, author, category'
-      });
-    }
-    
-    // Obtener el siguiente ID
-    const { featured, ...categories } = booksData;
-    const allBooks = Object.values(categories).flat();
-    const maxId = allBooks.length > 0 ? Math.max(...allBooks.map(b => b.id)) : 0;
-    const nextId = maxId + 1;
-    
-    // Crear el nuevo libro
-    const newBook = {
-      id: nextId,
-      title,
-      author,
-      category,
-      cover: cover || '/img/ficcion-1.jpg'
-    };
-    
-    // Agregar a la categoría correspondiente
-    if (!booksData[category]) {
-      booksData[category] = [];
-    }
-    booksData[category].push(newBook);
+    const bookData = req.body;
+    const newBook = await createBook(bookData);
     
     res.status(201).json({
       success: true,
       data: newBook,
-      message: 'Libro agregado exitosamente'
+      message: 'Libro creado exitosamente'
     });
   } catch (error) {
-    res.status(500).json({
+    console.error('Error creating book:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// PUT /api/books/:id - Actualizar un libro
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    if (isNaN(parseInt(id))) {
+      return res.status(400).json({
+        success: false,
+        error: 'ID inválido'
+      });
+    }
+    
+    const updatedBook = await updateBook(id, updateData);
+    
+    res.json({
+      success: true,
+      data: updatedBook,
+      message: 'Libro actualizado exitosamente'
+    });
+  } catch (error) {
+    console.error('Error updating book:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
       success: false,
       error: error.message
     });
@@ -175,50 +176,28 @@ router.post('/', (req, res) => {
 });
 
 // DELETE /api/books/:id - Eliminar un libro
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const bookId = parseInt(id);
     
-    let bookFound = false;
-    let bookCategory = null;
-    
-    // Buscar y eliminar el libro de todas las categorías
-    for (const category in booksData) {
-      if (category === 'featured') continue;
-      
-      const index = booksData[category].findIndex(book => book.id === bookId);
-      if (index !== -1) {
-        booksData[category].splice(index, 1);
-        bookFound = true;
-        bookCategory = category;
-        break;
-      }
-    }
-    
-    // También eliminar de featured si está ahí
-    if (booksData.featured) {
-      const featuredIndex = booksData.featured.findIndex(book => book.id === bookId);
-      if (featuredIndex !== -1) {
-        booksData.featured.splice(featuredIndex, 1);
-      }
-    }
-    
-    if (!bookFound) {
-      return res.status(404).json({
+    if (isNaN(parseInt(id))) {
+      return res.status(400).json({
         success: false,
-        error: 'Libro no encontrado'
+        error: 'ID inválido'
       });
     }
+    
+    const deletedBook = await deleteBook(id);
     
     res.json({
       success: true,
       message: 'Libro eliminado exitosamente',
-      deletedId: bookId,
-      category: bookCategory
+      data: deletedBook
     });
   } catch (error) {
-    res.status(500).json({
+    console.error('Error deleting book:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
       success: false,
       error: error.message
     });
@@ -226,4 +205,3 @@ router.delete('/:id', (req, res) => {
 });
 
 export { router as booksRouter };
-

@@ -18,10 +18,13 @@ app.get('/', (req, res) => {
     message: 'API de Librería El Saber',
     version: '1.0.0',
     endpoints: {
-      books: '/api/books',
-      booksByCategory: '/api/books/category/:category',
-      search: '/api/books/search?q=query',
-      addBook: 'POST /api/books',
+      getAllBooks: 'GET /api/books',
+      getBookById: 'GET /api/books/:id',
+      getByCategory: 'GET /api/books/category/:category',
+      getFeatured: 'GET /api/books/featured',
+      search: 'GET /api/books/search?q=query',
+      createBook: 'POST /api/books',
+      updateBook: 'PUT /api/books/:id',
       deleteBook: 'DELETE /api/books/:id'
     }
   });
