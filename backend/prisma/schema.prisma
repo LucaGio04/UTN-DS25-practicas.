@@ -13,7 +13,8 @@ datasource db {
 model Book {
   id        Int      @id @default(autoincrement())
   title     String
-  author    String
+  authorId  Int       // Clave foránea
+  author    User      @relation(fields: [authorId], references: [id]) // Campo de relación
   cover     String
   category  String
   price     Int      @default(0)
@@ -22,6 +23,14 @@ model Book {
   updatedAt DateTime @updatedAt
 
   @@index([category])
-  @@index([author])
   @@index([title])
+  @@index([authorId])
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  name     String
+  password String // Nuevo campo para la contraseña
+  books    Book[]  // Campo de relación: Uno a Muchos
 }

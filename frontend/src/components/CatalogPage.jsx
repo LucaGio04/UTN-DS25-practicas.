@@ -48,17 +48,17 @@ export const CatalogPage = ({ books, searchQuery }) => {
           {books.map((book) => (
             <div key={book.id} className="relative">
               <BookCard book={book} />
-              <div className="absolute top-2 right-2">
+              <div className="absolute top-2 right-2 z-10">
                 <button
                   onClick={() => handleRemoveBook(book.id, book.category)}
-                  className="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold"
+                  className="bg-red-500 hover:bg-red-600 text-white rounded-full w-9 h-9 flex items-center justify-center text-lg font-bold shadow-lg transition-all hover:scale-110"
                   title="Eliminar libro"
                 >
                   ×
                 </button>
               </div>
-              <div className="absolute top-2 left-2">
-                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+              <div className="absolute top-2 left-2 z-10">
+                <span className="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
                   {getCategoryDisplayName(book.category)}
                 </span>
               </div>

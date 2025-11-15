@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import BookCard from './Bookcard.jsx';
 import { useBooks } from '../hooks/useBooks.js';
 import { useSearch } from '../hooks/useBooks.js';
@@ -8,18 +8,7 @@ export const HomePage = () => {
   const { searchQuery, getSearchResults } = useSearch();
   const allBooks = getAllBooks();
 
-  // useEffect: Ejemplo de efecto para actualizar estadísticas cuando cambian los libros
-  useEffect(() => {
-    console.log('📊 Estadísticas actualizadas:', {
-      total: allBooks.length,
-      porCategoria: {
-        ficcion: getBooksByCategory('ficcion').length,
-        ciencia: getBooksByCategory('ciencia').length,
-        historia: getBooksByCategory('historia').length,
-        biografias: getBooksByCategory('biografias').length
-      }
-    });
-  }, [allBooks.length, getBooksByCategory]);
+  // Removido el useEffect que mostraba logs constantes de estadísticas
 
   // Filtrar libros según la búsqueda global
   const filteredBooks = searchQuery 

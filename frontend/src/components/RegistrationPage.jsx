@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth.js';
 
-export const RegistrationPage = () => {
+export const RegistrationPage = ({ setCurrentPage }) => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -21,11 +23,51 @@ export const RegistrationPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    // Aquí normalmente se enviarían los datos a un servidor
-    console.log('Datos del formulario:', formData);
+    
+    try {
+      // Mapear los datos del formulario a lo que espera el backend
+      const userData = {
+        email: formData.email,
+        name: `${formData.nombre} ${formData.apellido}`.trim(), // Combinar nombre y apellido
+        password: formData.password,
+      };
+
+      const response = await fetch('http://localhost:3000/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al registrar usuario');
+      }
+
+      // Hacer login automáticamente después del registro
+      const loginSuccess = await login(formData.email, formData.password);
+      if (loginSuccess) {
+        setIsSubmitted(true);
+        console.log('Usuario registrado y logueado exitosamente:', data);
+        // Redirigir a inicio después de un breve delay
+        setTimeout(() => {
+          if (setCurrentPage) {
+            setCurrentPage('inicio');
+          }
+        }, 2000);
+      } else {
+        // Si el login falla, solo mostrar el mensaje de registro exitoso
+        setIsSubmitted(true);
+        console.log('Usuario registrado exitosamente:', data);
+      }
+    } catch (error) {
+      console.error('Error al registrar usuario:', error);
+      alert(`Error: ${error.message}`);
+    }
   };
 
   if (isSubmitted) {
@@ -34,25 +76,32 @@ export const RegistrationPage = () => {
         <div className="text-green-500 text-6xl mb-4">✓</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">¡Registro Exitoso!</h2>
         <p className="text-gray-600 mb-6">
-          Gracias por registrarte en Librería El Saber. Te hemos enviado un email de confirmación.
+          Gracias por registrarte en Librería El Saber. Has sido autenticado automáticamente.
+          {setCurrentPage && (
+            <span className="block mt-2 text-sm text-blue-600">
+              Redirigiendo a la página principal...
+            </span>
+          )}
         </p>
-        <button
-          onClick={() => {
-            setIsSubmitted(false);
-            setFormData({
-              nombre: '',
-              apellido: '',
-              fechaNacimiento: '',
-              email: '',
-              password: '',
-              sexo: '',
-              temaFavorito: ''
-            });
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200"
-        >
-          Registrar Otro Usuario
-        </button>
+        {!setCurrentPage && (
+          <button
+            onClick={() => {
+              setIsSubmitted(false);
+              setFormData({
+                nombre: '',
+                apellido: '',
+                fechaNacimiento: '',
+                email: '',
+                password: '',
+                sexo: '',
+                temaFavorito: ''
+              });
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200"
+          >
+            Registrar Otro Usuario
+          </button>
+        )}
       </div>
     );
   }

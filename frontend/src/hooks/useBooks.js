@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useBookContext } from '../context/BookContext';
+import { useAuth } from './useAuth.js'; // Importar useAuth
 
 // URL base de la API Express
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -21,6 +22,7 @@ const API_BASE_URL = 'http://localhost:3000/api';
 export const useApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { token } = useAuth(); // Obtener el token del hook useAuth
 
   const fetchData = useCallback(async (url, options = {}) => {
     setLoading(true);
@@ -34,6 +36,7 @@ export const useApi = () => {
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }), // Añadir el token si existe
           ...options.headers
         },
         signal: controller.signal,
@@ -43,7 +46,14 @@ export const useApi = () => {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}` }));
+        // Si es un error 401 y no hay token, puede ser que la ruta no debería requerir autenticación
+        if (response.status === 401 && !token) {
+          // Para peticiones GET públicas, esto no debería pasar, pero manejamos el error de forma más amigable
+          const errorMessage = errorData.error || 'Error de autenticación';
+          throw new Error(errorMessage);
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -51,6 +61,8 @@ export const useApi = () => {
     } catch (err) {
       if (err.name === 'AbortError') {
         setError('La petición tardó demasiado tiempo');
+      } else if (err.message === 'Failed to fetch' || err.message.includes('fetch')) {
+        setError('No se pudo conectar con el servidor. Asegúrate de que el backend esté corriendo en http://localhost:3000');
       } else {
         setError(err.message);
       }
@@ -58,7 +70,7 @@ export const useApi = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]); // Añadir token a las dependencias
 
   return { loading, error, fetchData };
 };
@@ -81,6 +93,8 @@ export const useApi = () => {
 export const useBooks = () => {
   const context = useBookContext();
   const { fetchData } = useApi();
+
+  const [users, setUsers] = useState([]); // Nuevo estado para almacenar usuarios
 
   /**
    * Función para cargar libros desde la API Express
@@ -127,6 +141,42 @@ export const useBooks = () => {
       context.setLoading(false);
     }
   }, [fetchData, context.setLoading, context.setError, context.setBooks, context.updateNextId]);
+
+  /**
+   * Función para cargar usuarios desde la API Express
+   */
+  const loadUsersFromApi = useCallback(async () => {
+    try {
+      const response = await fetchData(`${API_BASE_URL}/users`);
+      if (!response.success) {
+        throw new Error(response.error || 'Error al cargar usuarios');
+      }
+      setUsers(response.data || []);
+    } catch (err) {
+      console.warn('Error loading users from API (esto es normal si no hay usuarios):', err.message);
+      setUsers([]); // Establecer array vacío en caso de error
+      // No lanzar el error para que no interrumpa la carga de la página
+    }
+  }, [fetchData]);
+
+  // useEffect para cargar datos solo una vez al montar
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (isMounted) {
+        await loadBooksFromApi();
+        await loadUsersFromApi();
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar una vez al montar
 
   /**
    * Función para agregar un nuevo libro a través de la API
@@ -191,6 +241,7 @@ export const useBooks = () => {
     error: context.error,
     searchQuery: context.searchQuery,
     currentPage: context.currentPage,
+    users, // Exportar el estado de usuarios
     
     // Acciones
     loadBooksFromApi,
@@ -198,6 +249,7 @@ export const useBooks = () => {
     removeBook,
     setSearchQuery: context.setSearchQuery,
     setCurrentPage: context.setCurrentPage,
+    loadUsersFromApi, // Exportar la función para cargar usuarios
     
     // Funciones utilitarias
     getAllBooks: context.getAllBooks,

@@ -178,7 +178,11 @@ export const BookProvider = ({ children }) => {
     
     const results = allBooks.filter(book => {
       const titleMatch = book.title ? normalizeText(book.title).includes(searchTerm) : false;
-      const authorMatch = book.author ? normalizeText(book.author).includes(searchTerm) : false;
+      // Manejar author como string o objeto
+      const authorName = book.author 
+        ? (typeof book.author === 'string' ? book.author : (book.author.name || ''))
+        : '';
+      const authorMatch = authorName ? normalizeText(authorName).includes(searchTerm) : false;
       const categoryMatch = book.category ? normalizeText(book.category).includes(searchTerm) : false;
       
       return titleMatch || authorMatch || categoryMatch;

@@ -1,22 +1,8 @@
-import express from 'express';
-import {
-  getAllBooks,
-  getBookById,
-  createBook,
-  updateBook,
-  deleteBook,
-  getBooksByCategory,
-  getFeaturedBooks,
-  searchBooks
-} from '../src/services/book.service.js';
+import * as bookService from '../services/book.service.js';
 
-const router = express.Router();
-
-// GET /api/books - Obtener todos los libros
-router.get('/', async (req, res) => {
+export const getAllBooks = async (req, res) => {
   try {
-    const allBooks = await getAllBooks();
-    
+    const allBooks = await bookService.getAllBooks();
     res.json({
       success: true,
       data: allBooks,
@@ -30,14 +16,12 @@ router.get('/', async (req, res) => {
       error: error.message
     });
   }
-});
+};
 
-// GET /api/books/category/:category - Obtener libros por categoría
-router.get('/category/:category', async (req, res) => {
+export const getBooksByCategory = async (req, res) => {
   try {
     const { category } = req.params;
-    const books = await getBooksByCategory(category);
-    
+    const books = await bookService.getBooksByCategory(category);
     res.json({
       success: true,
       data: books,
@@ -52,13 +36,11 @@ router.get('/category/:category', async (req, res) => {
       error: error.message
     });
   }
-});
+};
 
-// GET /api/books/featured - Obtener libros destacados
-router.get('/featured', async (req, res) => {
+export const getFeaturedBooks = async (req, res) => {
   try {
-    const featuredBooks = await getFeaturedBooks();
-    
+    const featuredBooks = await bookService.getFeaturedBooks();
     res.json({
       success: true,
       data: featuredBooks,
@@ -72,14 +54,12 @@ router.get('/featured', async (req, res) => {
       error: error.message
     });
   }
-});
+};
 
-// GET /api/books/search?q=query - Buscar libros
-router.get('/search', async (req, res) => {
+export const searchBooks = async (req, res) => {
   try {
     const query = req.query.q || '';
-    const results = await searchBooks(query);
-    
+    const results = await bookService.searchBooks(query);
     res.json({
       success: true,
       data: results,
@@ -94,22 +74,12 @@ router.get('/search', async (req, res) => {
       error: error.message
     });
   }
-});
+};
 
-// GET /api/books/:id - Obtener un libro por ID
-router.get('/:id', async (req, res) => {
+export const getBookById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    if (isNaN(parseInt(id))) {
-      return res.status(400).json({
-        success: false,
-        error: 'ID inválido'
-      });
-    }
-    
-    const book = await getBookById(id);
-    
+    const book = await bookService.getBookById(parseInt(id));
     res.json({
       success: true,
       data: book
@@ -122,14 +92,12 @@ router.get('/:id', async (req, res) => {
       error: error.message
     });
   }
-});
+};
 
-// POST /api/books - Crear un nuevo libro
-router.post('/', async (req, res) => {
+export const createBook = async (req, res) => {
   try {
     const bookData = req.body;
-    const newBook = await createBook(bookData);
-    
+    const newBook = await bookService.createBook(bookData);
     res.status(201).json({
       success: true,
       data: newBook,
@@ -143,23 +111,13 @@ router.post('/', async (req, res) => {
       error: error.message
     });
   }
-});
+};
 
-// PUT /api/books/:id - Actualizar un libro
-router.put('/:id', async (req, res) => {
+export const updateBook = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-    
-    if (isNaN(parseInt(id))) {
-      return res.status(400).json({
-        success: false,
-        error: 'ID inválido'
-      });
-    }
-    
-    const updatedBook = await updateBook(id, updateData);
-    
+    const updatedBook = await bookService.updateBook(parseInt(id), updateData);
     res.json({
       success: true,
       data: updatedBook,
@@ -173,22 +131,12 @@ router.put('/:id', async (req, res) => {
       error: error.message
     });
   }
-});
+};
 
-// DELETE /api/books/:id - Eliminar un libro
-router.delete('/:id', async (req, res) => {
+export const deleteBook = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    if (isNaN(parseInt(id))) {
-      return res.status(400).json({
-        success: false,
-        error: 'ID inválido'
-      });
-    }
-    
-    const deletedBook = await deleteBook(id);
-    
+    const deletedBook = await bookService.deleteBook(parseInt(id));
     res.json({
       success: true,
       message: 'Libro eliminado exitosamente',
@@ -202,6 +150,4 @@ router.delete('/:id', async (req, res) => {
       error: error.message
     });
   }
-});
-
-export { router as booksRouter };
+};

@@ -12,6 +12,14 @@ export const SectionPage = ({ title, books, allBooks, searchQuery }) => {
     };
   }, [title, books.length]);
 
+  // Función para obtener el nombre del autor (maneja tanto string como objeto)
+  const getAuthorName = (author) => {
+    if (!author) return 'Autor desconocido';
+    if (typeof author === 'string') return author;
+    if (typeof author === 'object' && author.name) return author.name;
+    return 'Autor desconocido';
+  };
+
   // Función para normalizar texto (eliminar acentos)
   const normalizeText = (text) => {
     if (!text) return '';
@@ -26,7 +34,8 @@ export const SectionPage = ({ title, books, allBooks, searchQuery }) => {
     ? allBooks.filter(book => {
         const searchTerm = normalizeText(searchQuery);
         const titleMatch = book.title ? normalizeText(book.title).includes(searchTerm) : false;
-        const authorMatch = book.author ? normalizeText(book.author).includes(searchTerm) : false;
+        const authorName = getAuthorName(book.author);
+        const authorMatch = authorName ? normalizeText(authorName).includes(searchTerm) : false;
         const categoryMatch = book.category ? normalizeText(book.category).includes(searchTerm) : false;
         return titleMatch || authorMatch || categoryMatch;
       })
@@ -129,7 +138,7 @@ export const SectionPage = ({ title, books, allBooks, searchQuery }) => {
                 {books.slice(0, 3).map((book) => (
                   <li key={book.id} className="flex items-center">
                     <span className="text-blue-500 mr-2">•</span>
-                    <span className="truncate">"{book.title}" - {book.author}</span>
+                    <span className="truncate">"{book.title}" - {getAuthorName(book.author)}</span>
                   </li>
                 ))}
               </ul>

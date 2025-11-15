@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { Prisma } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 /**
  * Servicio para gestionar operaciones CRUD de libros
@@ -15,6 +16,9 @@ export const getAllBooks = async () => {
     const books = await prisma.book.findMany({
       orderBy: {
         id: 'asc'
+      },
+      include: {
+        author: true // Incluye la información del autor
       }
     });
     return books;
@@ -33,7 +37,10 @@ export const getAllBooks = async () => {
 export const getBookById = async (id) => {
   try {
     const book = await prisma.book.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
+      include: {
+        author: true // Incluye la información del autor
+      }
     });
 
     if (!book) {
@@ -55,33 +62,50 @@ export const getBookById = async (id) => {
 
 /**
  * Crear un nuevo libro
- * @param {Object} data - Datos del libro (title, author, cover, category, price)
+ * @param {Object} data - Datos del libro (title, authorName, authorEmail, cover, category, price)
  * @returns {Promise<Object>} Libro creado
  * @throws {Error} Si hay errores de validación o de BD
  */
 export const createBook = async (data) => {
   try {
-    // Validaciones de negocio
-    if (!data.title || !data.author || !data.category) {
-      const error = new Error('Faltan campos requeridos: title, author, category');
-      error.statusCode = 400;
-      throw error;
+    // Buscar o crear el usuario/autor
+    let author;
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.authorEmail },
+    });
+
+    if (existingUser) {
+      // Si el usuario existe, usarlo
+      author = existingUser;
+    } else {
+      // Si no existe, crear un nuevo usuario/autor
+      // Generar una contraseña aleatoria para el autor (no se usará para login)
+      const randomPassword = Math.random().toString(36).slice(-12);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      
+      author = await prisma.user.create({
+        data: {
+          email: data.authorEmail,
+          name: data.authorName,
+          password: hashedPassword, // Contraseña generada automáticamente
+        },
+      });
     }
 
-    if (data.price !== undefined && data.price < 0) {
-      const error = new Error('El precio debe ser mayor o igual a 0');
-      error.statusCode = 400;
-      throw error;
-    }
-
+    // Crear el libro asociado al autor
     const book = await prisma.book.create({
       data: {
         title: data.title,
-        author: data.author,
+        author: {
+          connect: { id: author.id },
+        },
         cover: data.cover || '/img/ficcion-1.jpg',
         category: data.category,
         price: data.price || 0,
         featured: data.featured || false
+      },
+      include: {
+        author: true
       }
     });
 
@@ -116,23 +140,25 @@ export const createBook = async (data) => {
  */
 export const updateBook = async (id, updateData) => {
   try {
-    // Validación de precio si se proporciona
-    if (updateData.price !== undefined && updateData.price < 0) {
-      const error = new Error('El precio debe ser mayor o igual a 0');
-      error.statusCode = 400;
-      throw error;
+    // Si se proporciona authorId, conectarlo
+    if (updateData.authorId) {
+      updateData.author = { connect: { id: updateData.authorId } };
+      delete updateData.authorId;
     }
 
     const book = await prisma.book.update({
       where: { id: parseInt(id) },
-      data: updateData
+      data: updateData,
+      include: {
+        author: true // Incluye la información del autor
+      }
     });
 
     return book;
   } catch (error) {
     // Manejar error P2025: Registro no encontrado
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-      const notFoundError = new Error('Libro no encontrado');
+      const notFoundError = new Error('Libro no encontrado o AuthorId inválido');
       notFoundError.statusCode = 404;
       notFoundError.code = 'P2025';
       throw notFoundError;
@@ -188,6 +214,9 @@ export const getBooksByCategory = async (category) => {
       },
       orderBy: {
         id: 'asc'
+      },
+      include: {
+        author: true // Incluye la información del autor
       }
     });
     return books;
@@ -209,6 +238,9 @@ export const getFeaturedBooks = async () => {
       },
       orderBy: {
         id: 'asc'
+      },
+      include: {
+        author: true // Incluye la información del autor
       }
     });
     return books;
@@ -242,9 +274,13 @@ export const searchBooks = async (query) => {
           },
           {
             author: {
-              contains: searchTerm,
-              mode: 'insensitive'
-            }
+              is: {
+                name: {
+                  contains: searchTerm,
+                  mode: 'insensitive'
+                },
+              },
+            },
           },
           {
             category: {
@@ -256,6 +292,9 @@ export const searchBooks = async (query) => {
       },
       orderBy: {
         id: 'asc'
+      },
+      include: {
+        author: true // Incluye la información del autor
       }
     });
 

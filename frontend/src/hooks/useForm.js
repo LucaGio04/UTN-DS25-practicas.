@@ -25,7 +25,15 @@ export const useForm = (initialValues = {}, validationRules = {}) => {
   // Función para manejar cambios en los inputs
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
-    const newValue = type === 'checkbox' ? checked : value;
+    let newValue;
+
+    if (type === 'checkbox') {
+      newValue = checked;
+    } else if (type === 'number' || type === 'range') {
+      newValue = value === '' ? '' : Number(value); // Convertir a número, manejar string vacío
+    } else {
+      newValue = value;
+    }
     
     setValues(prev => ({
       ...prev,
@@ -206,27 +214,45 @@ export const useForm = (initialValues = {}, validationRules = {}) => {
 export const useBookForm = () => {
   const initialValues = {
     title: '',
-    author: '',
+    authorName: '',
+    authorEmail: '',
     category: 'ficcion',
-    cover: '/img/ficcion-1.jpg'
+    cover: '/img/ficcion-1.jpg',
+    price: 0,
   };
 
   const validationRules = {
     title: {
       required: true,
       requiredMessage: 'El título es requerido',
-      minLength: 2,
-      minLengthMessage: 'El título debe tener al menos 2 caracteres',
+      minLength: 3,
+      minLengthMessage: 'El título debe tener al menos 3 caracteres',
       maxLength: 100,
       maxLengthMessage: 'El título no puede tener más de 100 caracteres'
     },
-    author: {
+    authorName: {
       required: true,
-      requiredMessage: 'El autor es requerido',
-      minLength: 2,
-      minLengthMessage: 'El autor debe tener al menos 2 caracteres',
-      maxLength: 50,
-      maxLengthMessage: 'El autor no puede tener más de 50 caracteres'
+      requiredMessage: 'El nombre del autor es requerido',
+      minLength: 3,
+      minLengthMessage: 'El nombre del autor debe tener al menos 3 caracteres',
+      maxLength: 100,
+      maxLengthMessage: 'El nombre del autor no puede tener más de 100 caracteres'
+    },
+    authorEmail: {
+      required: true,
+      requiredMessage: 'El email del autor es requerido',
+      email: true,
+      emailMessage: 'El email debe ser válido'
+    },
+    price: {
+      required: true,
+      requiredMessage: 'El precio es requerido',
+      custom: (value) => {
+        if (isNaN(value) || value < 0) {
+          return 'El precio debe ser un número mayor o igual a 0';
+        }
+        return '';
+      }
     },
     category: {
       required: true,

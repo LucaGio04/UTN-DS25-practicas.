@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import { booksRouter } from './routes/books.js';
+import { bookRoutes } from './src/routes/book.routes.js';
+import { userRoutes } from './src/routes/user.routes.js';
+import { authRoutes } from './src/routes/auth.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,7 +12,9 @@ app.use(cors()); // Permitir peticiones desde el frontend
 app.use(express.json()); // Parsear JSON en el body
 
 // Rutas
-app.use('/api/books', booksRouter);
+app.use('/api/books', bookRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -25,7 +29,15 @@ app.get('/', (req, res) => {
       search: 'GET /api/books/search?q=query',
       createBook: 'POST /api/books',
       updateBook: 'PUT /api/books/:id',
-      deleteBook: 'DELETE /api/books/:id'
+      deleteBook: 'DELETE /api/books/:id',
+      // User Endpoints
+      getAllUsers: 'GET /api/users',
+      getUserById: 'GET /api/users/:id',
+      createUser: 'POST /api/users',
+      updateUser: 'PUT /api/users/:id',
+      deleteUser: 'DELETE /api/users/:id',
+      // Auth Endpoints
+      login: 'POST /api/auth/login',
     }
   });
 });
