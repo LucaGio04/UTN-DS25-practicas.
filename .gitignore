@@ -9,3 +9,7 @@ node_modules/
 .env.local
 .env.*.local
 **/.env
+
+# Documentation files (MD) - No subir archivos de documentación
+*.md
+!README.md

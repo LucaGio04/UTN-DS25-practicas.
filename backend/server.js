@@ -8,7 +8,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors()); // Permitir peticiones desde el frontend
+// Configurar CORS para permitir peticiones desde el frontend en producción
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions)); // Permitir peticiones desde el frontend
 app.use(express.json()); // Parsear JSON en el body
 
 // Rutas
@@ -49,8 +55,9 @@ app.use((err, req, res, next) => {
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`📚 API de libros disponible en http://localhost:${PORT}/api/books`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor corriendo en http://0.0.0.0:${PORT}`);
+  console.log(`📚 API de libros disponible en http://0.0.0.0:${PORT}/api/books`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 

@@ -1,36 +1,26 @@
 import React, { useState } from 'react';
-import { useForm } from '../hooks/useForm.js';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../hooks/useAuth.js';
+import { loginSchema } from '../schemas/login.schema.js';
 
 export const LoginPage = ({ setCurrentPage }) => {
-  const { login, isAuthenticated: checkAuth } = useAuth();
+  const { login } = useAuth();
   const [loginError, setLoginError] = useState(null);
 
   const {
-    values,
-    errors,
-    isSubmitting,
-    handleChange,
-    handleBlur,
+    register,
     handleSubmit,
-    hasError,
-    getError,
-    isValid
-  } = useForm(
-    {
-      email: '',
-      password: '',
-    },
-    {
-      email: { required: true, requiredMessage: 'El email es requerido', email: true, emailMessage: 'Email inválido' },
-      password: { required: true, requiredMessage: 'La contraseña es requerida', minLength: 1, minLengthMessage: 'La contraseña es requerida' },
-    }
-  );
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: yupResolver(loginSchema),
+    mode: 'onBlur', // Validar al perder el foco
+  });
 
-  const onSubmit = async (formData) => {
+  const onSubmit = async (data) => {
     setLoginError(null);
     try {
-      const success = await login(formData.email, formData.password);
+      const success = await login(data.email, data.password);
       console.log('Resultado del login:', success);
       
       if (success) {
@@ -88,10 +78,7 @@ export const LoginPage = ({ setCurrentPage }) => {
           </div>
         )}
 
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(onSubmit);
-        }} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">
               Email
@@ -103,20 +90,17 @@ export const LoginPage = ({ setCurrentPage }) => {
               <input
                 type="email"
                 id="email"
-                name="email"
-                value={values.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
+                {...register('email')}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                  hasError('email') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="tu@email.com"
               />
             </div>
-            {hasError('email') && (
+            {errors.email && (
               <p className="text-red-500 text-xs mt-1 flex items-center">
                 <span className="mr-1">❌</span>
-                {getError('email')}
+                {errors.email.message}
               </p>
             )}
           </div>
@@ -132,29 +116,26 @@ export const LoginPage = ({ setCurrentPage }) => {
               <input
                 type="password"
                 id="password"
-                name="password"
-                value={values.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
+                {...register('password')}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                  hasError('password') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300'
                 }`}
                 placeholder="••••••••"
               />
             </div>
-            {hasError('password') && (
+            {errors.password && (
               <p className="text-red-500 text-xs mt-1 flex items-center">
                 <span className="mr-1">❌</span>
-                {getError('password')}
+                {errors.password.message}
               </p>
             )}
           </div>
           
           <button
             type="submit"
-            disabled={isSubmitting || !isValid()}
+            disabled={isSubmitting}
             className={`w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg ${
-              isSubmitting || !isValid() ? 'opacity-50 cursor-not-allowed' : 'transform hover:scale-[1.02]'
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : 'transform hover:scale-[1.02]'
             }`}
           >
             {isSubmitting ? (

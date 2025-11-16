@@ -1,40 +1,34 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../hooks/useAuth.js';
+import { registrationSchema } from '../schemas/registration.schema.js';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 export const RegistrationPage = ({ setCurrentPage }) => {
   const { login } = useAuth();
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    fechaNacimiento: '',
-    email: '',
-    password: '',
-    sexo: '',
-    temaFavorito: ''
-  });
-
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: yupResolver(registrationSchema),
+    mode: 'onBlur',
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const onSubmit = async (data) => {
     try {
       // Mapear los datos del formulario a lo que espera el backend
       const userData = {
-        email: formData.email,
-        name: `${formData.nombre} ${formData.apellido}`.trim(), // Combinar nombre y apellido
-        password: formData.password,
+        email: data.email,
+        name: `${data.nombre} ${data.apellido}`.trim(), // Combinar nombre y apellido
+        password: data.password,
       };
 
-      const response = await fetch('http://localhost:3000/api/users', {
+      const response = await fetch(`${API_BASE_URL}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,17 +36,17 @@ export const RegistrationPage = ({ setCurrentPage }) => {
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al registrar usuario');
+        throw new Error(responseData.error || 'Error al registrar usuario');
       }
 
       // Hacer login automáticamente después del registro
-      const loginSuccess = await login(formData.email, formData.password);
+      const loginSuccess = await login(data.email, data.password);
       if (loginSuccess) {
         setIsSubmitted(true);
-        console.log('Usuario registrado y logueado exitosamente:', data);
+        console.log('Usuario registrado y logueado exitosamente:', responseData);
         // Redirigir a inicio después de un breve delay
         setTimeout(() => {
           if (setCurrentPage) {
@@ -62,7 +56,7 @@ export const RegistrationPage = ({ setCurrentPage }) => {
       } else {
         // Si el login falla, solo mostrar el mensaje de registro exitoso
         setIsSubmitted(true);
-        console.log('Usuario registrado exitosamente:', data);
+        console.log('Usuario registrado exitosamente:', responseData);
       }
     } catch (error) {
       console.error('Error al registrar usuario:', error);
@@ -85,18 +79,7 @@ export const RegistrationPage = ({ setCurrentPage }) => {
         </p>
         {!setCurrentPage && (
           <button
-            onClick={() => {
-              setIsSubmitted(false);
-              setFormData({
-                nombre: '',
-                apellido: '',
-                fechaNacimiento: '',
-                email: '',
-                password: '',
-                sexo: '',
-                temaFavorito: ''
-              });
-            }}
+            onClick={() => setIsSubmitted(false)}
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200"
           >
             Registrar Otro Usuario
@@ -110,7 +93,7 @@ export const RegistrationPage = ({ setCurrentPage }) => {
     <div className="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Formulario de Registro</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-2">
@@ -119,13 +102,15 @@ export const RegistrationPage = ({ setCurrentPage }) => {
             <input
               type="text"
               id="nombre"
-              name="nombre"
-              required
-              value={formData.nombre}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              {...register('nombre')}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
               placeholder="Tu nombre"
             />
+            {errors.nombre && (
+              <p className="text-red-500 text-xs mt-1">{errors.nombre.message}</p>
+            )}
           </div>
           
           <div>
@@ -135,13 +120,15 @@ export const RegistrationPage = ({ setCurrentPage }) => {
             <input
               type="text"
               id="apellido"
-              name="apellido"
-              required
-              value={formData.apellido}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              {...register('apellido')}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                errors.apellido ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
               placeholder="Tu apellido"
             />
+            {errors.apellido && (
+              <p className="text-red-500 text-xs mt-1">{errors.apellido.message}</p>
+            )}
           </div>
         </div>
 
@@ -152,12 +139,14 @@ export const RegistrationPage = ({ setCurrentPage }) => {
           <input
             type="date"
             id="fechaNacimiento"
-            name="fechaNacimiento"
-            required
-            value={formData.fechaNacimiento}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            {...register('fechaNacimiento')}
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+              errors.fechaNacimiento ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            }`}
           />
+          {errors.fechaNacimiento && (
+            <p className="text-red-500 text-xs mt-1">{errors.fechaNacimiento.message}</p>
+          )}
         </div>
 
         <div>
@@ -167,13 +156,15 @@ export const RegistrationPage = ({ setCurrentPage }) => {
           <input
             type="email"
             id="email"
-            name="email"
-            required
-            value={formData.email}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            {...register('email')}
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+              errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            }`}
             placeholder="tu@email.com"
           />
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+          )}
         </div>
 
         <div>
@@ -183,14 +174,15 @@ export const RegistrationPage = ({ setCurrentPage }) => {
           <input
             type="password"
             id="password"
-            name="password"
-            required
-            value={formData.password}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            {...register('password')}
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+              errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            }`}
             placeholder="Mínimo 8 caracteres"
-            minLength="8"
           />
+          {errors.password && (
+            <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+          )}
         </div>
 
         <div>
@@ -205,12 +197,9 @@ export const RegistrationPage = ({ setCurrentPage }) => {
                 <div key={option.id} className="flex items-center">
                   <input
                     id={`sexo-${option.id}`}
-                    name="sexo"
                     type="radio"
                     value={option.id}
-                    required
-                    checked={formData.sexo === option.id}
-                    onChange={handleInputChange}
+                    {...register('sexo')}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                   />
                   <label htmlFor={`sexo-${option.id}`} className="ml-3 block text-sm text-gray-700">
@@ -219,6 +208,9 @@ export const RegistrationPage = ({ setCurrentPage }) => {
                 </div>
               ))}
             </div>
+            {errors.sexo && (
+              <p className="text-red-500 text-xs mt-1">{errors.sexo.message}</p>
+            )}
           </fieldset>
         </div>
 
@@ -228,9 +220,7 @@ export const RegistrationPage = ({ setCurrentPage }) => {
           </label>
           <select
             id="temaFavorito"
-            name="temaFavorito"
-            value={formData.temaFavorito}
-            onChange={handleInputChange}
+            {...register('temaFavorito')}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
           >
             <option value="">Selecciona un tema</option>
@@ -246,9 +236,12 @@ export const RegistrationPage = ({ setCurrentPage }) => {
         <div className="pt-4">
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={isSubmitting}
+            className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            Completar Registro
+            {isSubmitting ? 'Registrando...' : 'Completar Registro'}
           </button>
         </div>
       </form>

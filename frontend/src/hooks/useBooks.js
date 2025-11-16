@@ -3,7 +3,7 @@ import { useBookContext } from '../context/BookContext';
 import { useAuth } from './useAuth.js'; // Importar useAuth
 
 // URL base de la API Express
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 /**
  * Custom Hook: useApi

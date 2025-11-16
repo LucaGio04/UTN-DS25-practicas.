@@ -1,25 +1,36 @@
 import React from 'react';
-import { useBookForm } from '../hooks/useForm.js';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useBooks } from '../hooks/useBooks.js';
 import { useAuth } from '../hooks/useAuth.js';
+import { bookSchema } from '../schemas/book.schema.js';
 
 export const AddBookPage = () => {
   const { addBook } = useBooks();
   const { isAuthenticated, token } = useAuth();
-  const {
-    values,
-    errors,
-    isSubmitting,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-    resetForm,
-    hasError,
-    getError,
-    isValid
-  } = useBookForm();
 
-  const onSubmit = async (formData) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    watch,
+  } = useForm({
+    resolver: yupResolver(bookSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      title: '',
+      authorName: '',
+      authorEmail: '',
+      category: 'ficcion',
+      cover: '/img/ficcion-1.jpg',
+      price: 0,
+    },
+  });
+
+  const watchedCover = watch('cover');
+
+  const onSubmit = async (data) => {
     try {
       // Verificar que el usuario esté autenticado
       if (!isAuthenticated || !token) {
@@ -28,10 +39,10 @@ export const AddBookPage = () => {
       }
 
       // Agregar el libro usando la API
-      await addBook(formData);
+      await addBook(data);
       
       // Limpiar formulario
-      resetForm();
+      reset();
       
       // Mostrar mensaje de éxito
       alert('¡Libro agregado exitosamente al catálogo!');
@@ -66,10 +77,7 @@ export const AddBookPage = () => {
         )}
       </div>
 
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit(onSubmit);
-      }} className="bg-white p-6 rounded-lg shadow-lg">
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-6 rounded-lg shadow-lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -78,18 +86,14 @@ export const AddBookPage = () => {
             <input
               type="text"
               id="title"
-              name="title"
-              value={values.title}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              required
+              {...register('title')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                hasError('title') ? 'border-red-500' : 'border-gray-300'
+                errors.title ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="Ingresa el título del libro"
             />
-            {hasError('title') && (
-              <p className="mt-1 text-sm text-red-600">{getError('title')}</p>
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
             )}
           </div>
 
@@ -100,18 +104,14 @@ export const AddBookPage = () => {
             <input
               type="text"
               id="authorName"
-              name="authorName"
-              value={values.authorName}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              required
+              {...register('authorName')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                hasError('authorName') ? 'border-red-500' : 'border-gray-300'
+                errors.authorName ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="Ingresa el nombre completo del autor"
             />
-            {hasError('authorName') && (
-              <p className="mt-1 text-sm text-red-600">{getError('authorName')}</p>
+            {errors.authorName && (
+              <p className="mt-1 text-sm text-red-600">{errors.authorName.message}</p>
             )}
           </div>
 
@@ -122,18 +122,14 @@ export const AddBookPage = () => {
             <input
               type="email"
               id="authorEmail"
-              name="authorEmail"
-              value={values.authorEmail}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              required
+              {...register('authorEmail')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                hasError('authorEmail') ? 'border-red-500' : 'border-gray-300'
+                errors.authorEmail ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="autor@email.com"
             />
-            {hasError('authorEmail') && (
-              <p className="mt-1 text-sm text-red-600">{getError('authorEmail')}</p>
+            {errors.authorEmail && (
+              <p className="mt-1 text-sm text-red-600">{errors.authorEmail.message}</p>
             )}
             <p className="mt-1 text-xs text-gray-500">
               Si el autor no existe, se creará automáticamente
@@ -146,12 +142,9 @@ export const AddBookPage = () => {
             </label>
             <select
               id="category"
-              name="category"
-              value={values.category}
-              onChange={handleChange}
-              onBlur={handleBlur}
+              {...register('category')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                hasError('category') ? 'border-red-500' : 'border-gray-300'
+                errors.category ? 'border-red-500' : 'border-gray-300'
               }`}
             >
               <option value="ficcion">Ficción</option>
@@ -160,8 +153,8 @@ export const AddBookPage = () => {
               <option value="biografias">Biografías</option>
               <option value="no-ficcion">No Ficción</option>
             </select>
-            {hasError('category') && (
-              <p className="mt-1 text-sm text-red-600">{getError('category')}</p>
+            {errors.category && (
+              <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
             )}
           </div>
 
@@ -172,20 +165,16 @@ export const AddBookPage = () => {
             <input
               type="number"
               id="price"
-              name="price"
-              value={values.price}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              required
+              {...register('price', { valueAsNumber: true })}
               min="0"
               step="1"
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                hasError('price') ? 'border-red-500' : 'border-gray-300'
+                errors.price ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="0"
             />
-            {hasError('price') && (
-              <p className="mt-1 text-sm text-red-600">{getError('price')}</p>
+            {errors.price && (
+              <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
             )}
           </div>
 
@@ -195,12 +184,9 @@ export const AddBookPage = () => {
             </label>
             <select
               id="cover"
-              name="cover"
-              value={values.cover}
-              onChange={handleChange}
-              onBlur={handleBlur}
+              {...register('cover')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                hasError('cover') ? 'border-red-500' : 'border-gray-300'
+                errors.cover ? 'border-red-500' : 'border-gray-300'
               }`}
             >
               <option value="/img/ficcion-1.jpg">Ficción 1</option>
@@ -212,8 +198,8 @@ export const AddBookPage = () => {
               <option value="/img/historia-portada.jpg">Historia</option>
               <option value="/img/no-ficcion-portada.jpg">No Ficción</option>
             </select>
-            {hasError('cover') && (
-              <p className="mt-1 text-sm text-red-600">{getError('cover')}</p>
+            {errors.cover && (
+              <p className="mt-1 text-sm text-red-600">{errors.cover.message}</p>
             )}
           </div>
 
@@ -223,7 +209,7 @@ export const AddBookPage = () => {
             </label>
             <div className="flex justify-center">
               <img
-                src={values.cover}
+                src={watchedCover}
                 alt="Vista previa de portada"
                 className="w-32 h-40 object-cover rounded-lg border-2 border-gray-300"
               />
@@ -234,9 +220,9 @@ export const AddBookPage = () => {
         <div className="mt-8 flex justify-center">
           <button
             type="submit"
-            disabled={isSubmitting || !isValid()}
+            disabled={isSubmitting}
             className={`px-8 py-3 rounded-lg font-medium text-white transition-colors ${
-              isSubmitting || !isValid()
+              isSubmitting
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
             }`}
@@ -255,7 +241,7 @@ export const AddBookPage = () => {
           <li>• El libro se agregará automáticamente a la categoría seleccionada</li>
           <li>• Puedes seleccionar una imagen de portada de las opciones disponibles</li>
           <li>• Después de agregar el libro, aparecerá en el catálogo general</li>
-          <li>• El formulario incluye validación en tiempo real</li>
+          <li>• El formulario incluye validación en tiempo real con React Hook Form y Yup</li>
         </ul>
       </div>
     </div>
